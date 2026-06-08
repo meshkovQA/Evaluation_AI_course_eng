@@ -137,7 +137,7 @@ expected_output_format = "Natural language text output"
 test_types = ["factual", "explanatory", "instructional", "comparative"]
 question_length = "long"  # Options: "short", "long", "mixed"
 question_openness = "open"  # Options: "open", "closed", "mixed"
-language = "Russian"  # Options: "English", "Russian", etc.
+language = "English"  # Options: "English", "Spanish", etc.
 trap_density = 0.2
 
 

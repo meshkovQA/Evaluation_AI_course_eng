@@ -1,3 +1,3 @@
 question,expected_response,expected_tools
 Find apartments cheaper than 3000 dollars,,"extract_offers, filter_offers"
-Find apartments cheaper than 3000 dollars and convert prices to rubles,,"extract_offers, normalize_offers_currency"
+Find apartments cheaper than 3000 dollars and convert prices to euros,,"extract_offers, normalize_offers_currency"

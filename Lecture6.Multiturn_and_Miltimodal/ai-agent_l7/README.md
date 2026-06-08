@@ -190,12 +190,12 @@ resp2 = requests.post(
     }
 )
 
-# 4. Convert to rubles (same session)
+# 4. Convert to euros (same session)
 resp3 = requests.post(
     "http://localhost:8000/ask",
     headers=headers,
     json={
-        "question": "Convert prices to rubles"
+        "question": "Convert prices to euros"
     }
 )
 
