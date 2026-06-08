@@ -1,0 +1,44 @@
+# Core dependencies
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+
+# File processing
+PyPDF2
+pdfplumber
+python-docx
+openpyxl
+python-multipart
+
+# Parsing and text processing
+beautifulsoup4
+lxml
+markdown
+
+# LLM and Embeddings
+openai
+anthropic
+
+# Vector databases
+chromadb
+pinecone
+faiss-cpu
+
+# Utilities
+python-dotenv
+httpx
+aiofiles
+numpy
+pandas
+
+# Security and authorization
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+
+# Monitoring and logging
+loguru
+
+# Deployment
+gunicorn
