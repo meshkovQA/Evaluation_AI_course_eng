@@ -9,7 +9,7 @@ The module uses several libraries:
 - language_tool_python (grammar)
 - fast_bleu (self-BLEU)
 - diversity (distinct-n)
-- for coherence, use DeepPavlov/rubert-base-cased embeddings (or an equivalent for your language)
+- for coherence, use bert-base-uncased embeddings (or an equivalent for your language)
 """
 
 import numpy as np
@@ -24,7 +24,7 @@ import torch
 from sklearn.metrics.pairwise import cosine_similarity
 
 
-def calculate_perplexity(text: str, model_id: str = "sberbank-ai/rugpt3small_based_on_gpt2") -> float:
+def calculate_perplexity(text: str, model_id: str = "gpt2") -> float:
     tokenizer = AutoTokenizer.from_pretrained(model_id)
     model = AutoModelForCausalLM.from_pretrained(model_id)
     model.eval()
@@ -38,19 +38,19 @@ def calculate_perplexity(text: str, model_id: str = "sberbank-ai/rugpt3small_bas
     return torch.exp(loss).item()
 
 
-def calculate_readability(text: str, lang: str = "ru") -> Dict[str, float]:
+def calculate_readability(text: str, lang: str = "en") -> Dict[str, float]:
     textstat.set_lang(lang)
     return {
         "flesch": textstat.flesch_reading_ease(text)
     }
 
 
-def calculate_grammar_errors(text: str, lang: str = "ru") -> int:
+def calculate_grammar_errors(text: str, lang: str = "en-US") -> int:
     tool = language_tool_python.LanguageTool(lang)
     return len(tool.check(text))
 
 
-def calculate_coherence_with_transformers(text: str, transformer_model: str = "DeepPavlov/rubert-base-cased") -> Dict[str, float]:
+def calculate_coherence_with_transformers(text: str, transformer_model: str = "bert-base-uncased") -> Dict[str, float]:
 
     tokenizer = AutoTokenizer.from_pretrained(transformer_model)
     model = AutoModel.from_pretrained(transformer_model)
