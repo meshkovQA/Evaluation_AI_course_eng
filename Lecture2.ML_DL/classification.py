@@ -5,7 +5,6 @@ from torch.utils.data import DataLoader
 import torchvision
 import torchvision.transforms as transforms
 import numpy as np
-import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, top_k_accuracy_score
 from scipy.stats import entropy as scipy_entropy
 from torchmetrics.classification import MulticlassCalibrationError, MulticlassAccuracy
@@ -102,82 +101,82 @@ def load_cifar10_data(batch_size=128, val_split=0.1):
     return train_loader, val_loader, test_loader, classes
 
 
-# def load_mnist_data(batch_size=128, val_split=0.1):
-#     """
-#     Load and prepare the MNIST dataset with a train/validation/test split.
-#
-#     MNIST contains 70,000 grayscale 28x28 images of handwritten digits:
-#     - digits from 0 to 9
-#
-#     Args:
-#         batch_size: batch size
-#         val_split: fraction of the training data to use for validation (0.1 = 10%)
-#     """
-#
-#     # Training set transforms (with augmentation)
-#     transform_train = transforms.Compose([
-#         # Random horizontal flip (less relevant for digits)
-#         transforms.RandomHorizontalFlip(p=0.1),  # Reduced probability
-#         # Random crop with padding
-#         transforms.RandomCrop(28, padding=2),     # Smaller padding for 28x28
-#         # Random rotation (useful for digits)
-#         transforms.RandomRotation(degrees=10),
-#         transforms.ToTensor(),                    # Convert to tensor
-#         #  normalization for MNIST
-#         transforms.Normalize((0.1307,), (0.3081,))
-#     ])
-#
-#     # Validation/test set transforms (without augmentation)
-#     transform_val_test = transforms.Compose([
-#         transforms.ToTensor(),
-#         #  normalization for MNIST
-#         transforms.Normalize((0.1307,), (0.3081,))
-#     ])
-#
-#     # Load MNIST instead of CIFAR-10
-#     full_train_dataset = torchvision.datasets.MNIST(
-#         root='./data', train=True, download=True, transform=transform_train
-#     )
-#     test_dataset = torchvision.datasets.MNIST(
-#         root='./data', train=False, download=True, transform=transform_val_test
-#     )
-#
-#     # Split the training set into train and validation (UNCHANGED)
-#     train_size = int((1 - val_split) * len(full_train_dataset))
-#     val_size = len(full_train_dataset) - train_size
-#
-#     # Reproducible split generator
-#     generator = torch.Generator().manual_seed(42)
-#     train_dataset, val_dataset_temp = torch.utils.data.random_split(
-#         full_train_dataset, [train_size, val_size], generator=generator
-#     )
-#
-#     # Separate validation dataset without augmentation
-#     val_dataset = torchvision.datasets.MNIST(
-#         root='./data', train=True, download=False, transform=transform_val_test
-#     )
-#
-#     # Get indices for the validation set
-#     val_indices = val_dataset_temp.indices
-#     val_dataset = torch.utils.data.Subset(val_dataset, val_indices)
-#
-#     # Build data loaders (UNCHANGED)
-#     train_loader = DataLoader(
-#         train_dataset, batch_size=batch_size, shuffle=True, num_workers=2)
-#     val_loader = DataLoader(
-#         val_dataset, batch_size=batch_size, shuffle=False, num_workers=2)
-#     test_loader = DataLoader(
-#         test_dataset, batch_size=batch_size, shuffle=False, num_workers=2)
-#
-#     # MNIST class names
-#     classes = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
-#
-#     print(f"Dataset sizes:")
-#     print(f"  - Training: {len(train_dataset)} samples")
-#     print(f"  - Validation: {len(val_dataset)} samples")
-#     print(f"  - Test: {len(test_dataset)} samples")
-#
-#     return train_loader, val_loader, test_loader, classes
+def load_mnist_data(batch_size=128, val_split=0.1):
+    """
+    Load and prepare the MNIST dataset with a train/validation/test split.
+
+    MNIST contains 70,000 grayscale 28x28 images of handwritten digits:
+    - digits from 0 to 9
+
+    Args:
+        batch_size: batch size
+        val_split: fraction of the training data to use for validation (0.1 = 10%)
+    """
+
+    # Training set transforms (with augmentation)
+    transform_train = transforms.Compose([
+        # Random horizontal flip (less relevant for digits)
+        transforms.RandomHorizontalFlip(p=0.1),  # Reduced probability
+        # Random crop with padding
+        transforms.RandomCrop(28, padding=2),     # Smaller padding for 28x28
+        # Random rotation (useful for digits)
+        transforms.RandomRotation(degrees=10),
+        transforms.ToTensor(),                    # Convert to tensor
+        #  normalization for MNIST
+        transforms.Normalize((0.1307,), (0.3081,))
+    ])
+
+    # Validation/test set transforms (without augmentation)
+    transform_val_test = transforms.Compose([
+        transforms.ToTensor(),
+        #  normalization for MNIST
+        transforms.Normalize((0.1307,), (0.3081,))
+    ])
+
+    # Load MNIST instead of CIFAR-10
+    full_train_dataset = torchvision.datasets.MNIST(
+        root='./data', train=True, download=True, transform=transform_train
+    )
+    test_dataset = torchvision.datasets.MNIST(
+        root='./data', train=False, download=True, transform=transform_val_test
+    )
+
+    # Split the training set into train and validation (UNCHANGED)
+    train_size = int((1 - val_split) * len(full_train_dataset))
+    val_size = len(full_train_dataset) - train_size
+
+    # Reproducible split generator
+    generator = torch.Generator().manual_seed(42)
+    train_dataset, val_dataset_temp = torch.utils.data.random_split(
+        full_train_dataset, [train_size, val_size], generator=generator
+    )
+
+    # Separate validation dataset without augmentation
+    val_dataset = torchvision.datasets.MNIST(
+        root='./data', train=True, download=False, transform=transform_val_test
+    )
+
+    # Get indices for the validation set
+    val_indices = val_dataset_temp.indices
+    val_dataset = torch.utils.data.Subset(val_dataset, val_indices)
+
+    # Build data loaders (UNCHANGED)
+    train_loader = DataLoader(
+        train_dataset, batch_size=batch_size, shuffle=True, num_workers=2)
+    val_loader = DataLoader(
+        val_dataset, batch_size=batch_size, shuffle=False, num_workers=2)
+    test_loader = DataLoader(
+        test_dataset, batch_size=batch_size, shuffle=False, num_workers=2)
+
+    # MNIST class names
+    classes = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
+
+    print(f"Dataset sizes:")
+    print(f"  - Training: {len(train_dataset)} samples")
+    print(f"  - Validation: {len(val_dataset)} samples")
+    print(f"  - Test: {len(test_dataset)} samples")
+
+    return train_loader, val_loader, test_loader, classes
 
 # ============================================================================
 # 2. NEURAL NETWORK ARCHITECTURE DEFINITION
@@ -231,16 +230,16 @@ class SimpleCNN_CIFAR(nn.Module):
 #     """
 #     A very simple model for comparison
 #     """
-#
+
 #     def __init__(self, num_classes=10):
 #         super(VerySimpleCNN, self).__init__()
-#
+
 #         self.conv1 = nn.Conv2d(1, 16, 5)  # 28x28 -> 24x24
 #         self.pool = nn.MaxPool2d(2, 2)    # 24x24 -> 12x12
 #         self.conv2 = nn.Conv2d(16, 32, 5)  # 12x12 -> 8x8
 #         self.fc1 = nn.Linear(32 * 4 * 4, 64)
 #         self.fc2 = nn.Linear(64, num_classes)
-#
+
 #     def forward(self, x):
 #         x = self.pool(torch.relu(self.conv1(x)))
 #         x = self.pool(torch.relu(self.conv2(x)))
@@ -250,47 +249,47 @@ class SimpleCNN_CIFAR(nn.Module):
 #         return x
 
 
-# class SimpleCNN(nn.Module):
-#     """
-#     A simple convolutional neural network for classifying CIFAR-10 images
-#     """
-#
-#     def __init__(self, num_classes=10):
-#         super(SimpleCNN, self).__init__()
-#         # 1) input channels = 1
-#         self.conv1 = nn.Conv2d(1, 32, 3, padding=1)     # 28x28 -> 28x28
-#         self.conv2 = nn.Conv2d(32, 64, 3, padding=1)    # 14x14 -> 14x14
-#         self.conv3 = nn.Conv2d(64, 128, 3, padding=1)   # 7x7   -> 7x7
-#         # 3x3   -> 3x3 (after 3 pools)
-#         self.conv4 = nn.Conv2d(128, 256, 3, padding=1)
-#
-#         self.pool = nn.MaxPool2d(2, 2)
-#         self.relu = nn.ReLU()
-#         self.dropout = nn.Dropout(0.5)
-#
-#         # 2) size after three pools on 28x28 is 3x3
-#         self.fc1 = nn.Linear(256 * 3 * 3, 512)
-#         self.fc2 = nn.Linear(512, 128)
-#         self.fc3 = nn.Linear(128, num_classes)
-#
-#     def forward(self, x):
-#         # Convolutional layers with activation and pooling
-#         x = self.pool(self.relu(self.conv1(x)))  # 32x32x32 -> 16x16x32
-#         x = self.pool(self.relu(self.conv2(x)))  # 16x16x64 -> 8x8x64
-#         x = self.pool(self.relu(self.conv3(x)))  # 8x8x128 -> 4x4x128
-#         x = self.relu(self.conv4(x))             # 4x4x256
-#
-#         # Flatten into a 1D vector
-#         x = x.view(x.size(0), -1)  # Flatten: batch_size x (4*4*256)
-#
-#         # Fully connected layers
-#         x = self.relu(self.fc1(x))
-#         x = self.dropout(x)
-#         x = self.relu(self.fc2(x))
-#         x = self.dropout(x)
-#         x = self.fc3(x)  # Output layer (logits)
-#
-#         return x
+class SimpleCNN(nn.Module):
+    """
+    A simple convolutional neural network for classifying CIFAR-10 images
+    """
+
+    def __init__(self, num_classes=10):
+        super(SimpleCNN, self).__init__()
+        # 1) input channels = 1
+        self.conv1 = nn.Conv2d(1, 32, 3, padding=1)     # 28x28 -> 28x28
+        self.conv2 = nn.Conv2d(32, 64, 3, padding=1)    # 14x14 -> 14x14
+        self.conv3 = nn.Conv2d(64, 128, 3, padding=1)   # 7x7   -> 7x7
+        # 3x3   -> 3x3 (after 3 pools)
+        self.conv4 = nn.Conv2d(128, 256, 3, padding=1)
+
+        self.pool = nn.MaxPool2d(2, 2)
+        self.relu = nn.ReLU()
+        self.dropout = nn.Dropout(0.5)
+
+        # 2) size after three pools on 28x28 is 3x3
+        self.fc1 = nn.Linear(256 * 3 * 3, 512)
+        self.fc2 = nn.Linear(512, 128)
+        self.fc3 = nn.Linear(128, num_classes)
+
+    def forward(self, x):
+        # Convolutional layers with activation and pooling
+        x = self.pool(self.relu(self.conv1(x)))  # 32x32x32 -> 16x16x32
+        x = self.pool(self.relu(self.conv2(x)))  # 16x16x64 -> 8x8x64
+        x = self.pool(self.relu(self.conv3(x)))  # 8x8x128 -> 4x4x128
+        x = self.relu(self.conv4(x))             # 4x4x256
+
+        # Flatten into a 1D vector
+        x = x.view(x.size(0), -1)  # Flatten: batch_size x (4*4*256)
+
+        # Fully connected layers
+        x = self.relu(self.fc1(x))
+        x = self.dropout(x)
+        x = self.relu(self.fc2(x))
+        x = self.dropout(x)
+        x = self.fc3(x)  # Output layer (logits)
+
+        return x
 
 # ============================================================================
 # 3. TRAINING AND EVALUATION FUNCTIONS
@@ -401,7 +400,8 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, device, n
         else:
             epochs_without_improvement += 1
             if epochs_without_improvement >= patience:
-                print(f'  ⏹️ Early stopping: {patience} epochs without improvement')
+                print(
+                    f'  ⏹️ Early stopping: {patience} epochs without improvement')
                 break
 
         print()
@@ -646,148 +646,3 @@ def plot_confusion_matrix(true_labels, predictions, classes):
     plt.grid(False)  # heatmap has its own grid
     plt.tight_layout()
     plt.show()
-
-
-# ============================================================================
-# 6. MAIN FUNCTION - COMPLETE PIPELINE
-# ============================================================================
-
-
-def main():
-    """
-    Main function demonstrating the full training and evaluation pipeline
-    """
-    print("=" * 80)
-    print("PRACTICE: DEEP LEARNING CLASSIFICATION AND METRICS")
-    print("=" * 80)
-
-    # 1. Load the data
-    print("\n1. Loading the CIFAR-10 data...")
-    train_loader, val_loader, test_loader, classes = load_cifar10_data(
-        batch_size=128, val_split=0.1)
-    print(f"Classes: {classes}")
-
-    # 2. Build the model
-    print("\n2. Building the model...")
-    model = SimpleCNN_CIFAR(num_classes=10).to(device)
-    criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
-
-    # Count the parameters
-    total_params = sum(p.numel() for p in model.parameters())
-    print(f"Total model parameters: {total_params:,}")
-
-    # 3. Train the model
-    print("\n3. Training the model with validation...")
-    print("=" * 60)
-    training_history = train_model(
-        model, train_loader, val_loader, criterion, optimizer, device, num_epochs=10
-    )
-
-    print(f"\n🎯 TRAINING SUMMARY:")
-    print(
-        f"Best validation accuracy: {training_history['best_val_accuracy']:.2f}%")
-
-    # 4. Final evaluation on the test set
-    print("\n4. Final evaluation on the test set...")
-    print("⚠️  IMPORTANT: The test set is used ONLY for the final evaluation!")
-    print("🔒 This set was NOT used during training or validation")
-    predictions, true_labels, softmax_probs, logits = evaluate_model_with_metrics(
-        model, test_loader, device, classes
-    )
-
-    # Basic accuracy on the test set
-    test_accuracy = accuracy_score(true_labels, predictions) * 100
-    val_accuracy = training_history['best_val_accuracy']
-
-    print(f"\n📊 VALIDATION VS TEST COMPARISON:")
-    print(f"Best validation accuracy: {val_accuracy:.2f}%")
-    print(f"Final test accuracy:      {test_accuracy:.2f}%")
-
-    accuracy_diff = abs(val_accuracy - test_accuracy)
-    if accuracy_diff < 2:
-        print(f"✅ Excellent agreement (difference: {accuracy_diff:.2f}%)")
-    elif accuracy_diff < 5:
-        print(f"✅ Good agreement (difference: {accuracy_diff:.2f}%)")
-    elif accuracy_diff < 10:
-        print(f"⚠️  Moderate discrepancy (difference: {accuracy_diff:.2f}%)")
-    else:
-        print(f"❌ Significant discrepancy (difference: {accuracy_diff:.2f}%)")
-        print("   Possible causes: overfitting on the validation set, data distribution shift")
-
-    # ========================================================================
-    # 5. METRIC COMPUTATION AND ANALYSIS
-    # ========================================================================
-
-    print("\n" + "=" * 50)
-    print("FINAL METRICS ON THE TEST SET")
-    print("=" * 50)
-    print("🔬 All metrics below are computed on the independent test set")
-
-    # 5.1 Basic accuracy (Top-1 Accuracy)
-    basic_accuracy = accuracy_score(true_labels, predictions) * 100
-    print(f"\n📊 BASIC METRICS:")
-    print(f"Top-1 Accuracy: {basic_accuracy:.2f}%")
-
-    # 5.2 Confidence Scores
-    confidence_scores = calculate_confidence_scores(softmax_probs)
-    avg_confidence = np.mean(confidence_scores)
-    print(f"Average Confidence Score: {avg_confidence:.3f}")
-    print(f"Min. Confidence Score: {np.min(confidence_scores):.3f}")
-    print(f"Max. Confidence Score: {np.max(confidence_scores):.3f}")
-
-    # 5.3 Top-K Accuracy
-    print(f"\n🎯 TOP-K ACCURACY:")
-    for k in [1, 3, 5]:
-        top_k_acc = calculate_top_k_accuracy(softmax_probs, true_labels, k=k)
-        print(f"Top-{k} Accuracy: {top_k_acc:.2f}%")
-
-    # 5.4 Entropy
-    entropy_values = calculate_entropy(softmax_probs)
-    avg_entropy = np.mean(entropy_values)
-    print(f"\n🔀 ENTROPY (uncertainty):")
-    print(f"Average entropy: {avg_entropy:.3f}")
-    print(f"Min. entropy: {np.min(entropy_values):.3f}")
-    print(f"Max. entropy: {np.max(entropy_values):.3f}")
-    print(f"Standard deviation: {np.std(entropy_values):.3f}")
-
-    # 5.5 Calibration
-    ece, bin_data = calculate_calibration_error(
-        softmax_probs, predictions, true_labels)
-    print(f"\n⚖️ CALIBRATION:")
-    print(
-        f"Expected Calibration Error (ECE), the difference between stated confidence and actual accuracy: {ece:.3f}")
-    print(f"How to interpret: if the model says 'I'm 80% sure', it is right in about 76-80% of those cases (almost perfect).")
-    print("ECE interpretation:")
-    print("  - 0.0-0.05: Excellently calibrated")
-    print("  - 0.05-0.1: Well calibrated")
-    print("  - 0.1-0.2: Moderately calibrated")
-    print("  - >0.2: Poorly calibrated")
-
-    # 5.6 Per-class analysis
-    print(f"\n📋 DETAILED PER-CLASS REPORT:")
-    class_report = classification_report(true_labels, predictions,
-                                         target_names=classes, digits=3)
-    print(class_report)
-
-    # ========================================================================
-    # 6. VISUALIZATION OF RESULTS
-    # ========================================================================
-
-    print("\n" + "=" * 50)
-    print("VISUALIZATION OF RESULTS")
-    print("=" * 50)
-
-    # Training plot with validation
-    overfitting_gap = plot_training_history(training_history)
-
-    # Confusion matrix
-    plot_confusion_matrix(true_labels, predictions, classes)
-
-# ============================================================================
-# 8. ENTRY POINT
-# ============================================================================
-
-
-if __name__ == "__main__":
-    main()

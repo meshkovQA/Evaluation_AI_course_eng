@@ -40,6 +40,10 @@ class DataLoader:
         self.data = None
         self.scaler_X = StandardScaler()
         self.scaler_y = StandardScaler()
+        # target_scale = how many dollars is 1 unit of the raw target.
+        # California Housing: target is in $100k, so multiplier = 100_000.
+        # Diamonds: target is already in $, so multiplier = 1.0 (see load_diamonds).
+        self.target_scale = 100_000.0
 
     def load_california_housing(self):
         """Loads the California Housing dataset"""
@@ -53,6 +57,36 @@ class DataLoader:
         df = pd.DataFrame(X, columns=feature_names)
         df['target'] = y
         self.data = df
+        self.target_scale = 100_000.0  # 1 unit of target = $100,000
+
+        return df
+
+    def load_diamonds(self):
+        """
+        Loads the Diamonds dataset (from seaborn) — parallel to load_california_housing.
+        """
+        print("\n💎 Loading the Diamonds dataset...")
+
+        df = sns.load_dataset('diamonds').dropna().copy()
+
+        # Diamonds has 3 categorical columns (cut, color, clarity) that are naturally ORDINAL.
+        # Encode them as ordered category codes so the standard StandardScaler in prepare_data works.
+        cut_order = ['Fair', 'Good', 'Very Good', 'Premium', 'Ideal']
+        color_order = ['J', 'I', 'H', 'G', 'F', 'E',
+                       'D']            # J = worst → D = best
+        clarity_order = ['I1', 'SI2', 'SI1',
+                         'VS2', 'VS1', 'VVS2', 'VVS1', 'IF']
+        df['cut'] = pd.Categorical(
+            df['cut'], categories=cut_order, ordered=True).codes
+        df['color'] = pd.Categorical(
+            df['color'], categories=color_order, ordered=True).codes
+        df['clarity'] = pd.Categorical(
+            df['clarity'], categories=clarity_order, ordered=True).codes
+
+        # Rename 'price' → 'target' so the rest of the pipeline works as-is (drop('target', axis=1)).
+        df = df.rename(columns={'price': 'target'})
+        self.data = df
+        self.target_scale = 1.0  # target is already in dollars — no *100k conversion needed
 
         return df
 
@@ -193,8 +227,11 @@ class ModelTrainer:
 class ModelEvaluator:
     """Class for evaluating the model"""
 
-    def __init__(self, scaler_y):
+    def __init__(self, scaler_y, target_scale=100_000.0):
+        # target_scale converts the raw target back into dollars.
+        # California Housing = 100_000 (default), Diamonds = 1.0.
         self.scaler_y = scaler_y
+        self.target_scale = target_scale
         self.metrics = {}
 
     def evaluate_model(self, model, model_name, X_test, y_test, training_time):
@@ -212,9 +249,10 @@ class ModelEvaluator:
             y_pred
         ).flatten()
 
-        # CONVERT TO DOLLARS: 1 unit = 100,000 $
-        y_test_dollars = y_test_original_units * 100_000.0
-        y_pred_dollars = y_pred_original_units * 100_000.0
+        # CONVERT TO DOLLARS: multiplier depends on the dataset
+        # (California Housing: 100_000, Diamonds: 1.0 — see DataLoader.target_scale).
+        y_test_dollars = y_test_original_units * self.target_scale
+        y_pred_dollars = y_pred_original_units * self.target_scale
 
         # Metrics in dollars
         mse = mean_squared_error(y_test_dollars, y_pred_dollars)
@@ -359,20 +397,33 @@ class HousingAnalyzer:
         self.visualizer = None
         self.mse_demo = MSEDemo()
 
-    def run_analysis(self):
-        """Run the full analysis"""
+    def run_analysis(self, dataset="california"):
+        """
+        Run the full analysis.
+
+        dataset: "california" (default) or "diamonds".
+        The only thing that differs between datasets is the loader call;
+        everything else in the pipeline is reused as-is.
+        """
         print("="*70)
         print("🏠 MSE FOR DEEP LEARNING - REAL HOUSING DATASET")
         print("="*70)
 
         # 1. Load the data
-        self.data_loader.load_california_housing()
+        if dataset == "diamonds":
+            self.data_loader.load_diamonds()
+        else:
+            self.data_loader.load_california_housing()
 
         # 2. Prepare the data
         X_train, X_val, X_test, y_train, y_val, y_test = self.data_loader.prepare_data()
 
         # 3. Create evaluator and visualizer
-        self.evaluator = ModelEvaluator(self.data_loader.scaler_y)
+        # Pass target_scale so the metrics/plots are printed in real dollars for BOTH datasets.
+        self.evaluator = ModelEvaluator(
+            self.data_loader.scaler_y,
+            target_scale=self.data_loader.target_scale,
+        )
         self.visualizer = DataVisualizer(self.data_loader)
 
         # 4. Build and train the standard model
@@ -417,7 +468,9 @@ class HousingAnalyzer:
 def main():
     """Main function that runs the analysis"""
     analyzer = HousingAnalyzer()
-    analyzer.run_analysis()
+    # HOMEWORK: to run the same pipeline on the Diamonds dataset,
+    # just change the argument below to "diamonds".
+    analyzer.run_analysis(dataset="california")  # or: dataset="diamonds"
 
     print("\n" + "="*80)
     print("ANALYSIS COMPLETED SUCCESSFULLY!")
