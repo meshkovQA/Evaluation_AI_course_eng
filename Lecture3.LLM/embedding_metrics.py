@@ -37,7 +37,7 @@ def _get_bertscore():
 # ---------- BERTSCORE ----------
 
 
-def calculate_bertscore(texts: List[str], lang: str = "ru") -> Dict:
+def calculate_bertscore(texts: List[str], lang: str = "en") -> Dict:
     """
     BERTScore between pairs (i, i+1)
     """

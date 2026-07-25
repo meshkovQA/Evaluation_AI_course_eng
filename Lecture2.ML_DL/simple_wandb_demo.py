@@ -217,8 +217,8 @@ def main():
     print("="*70)
 
     wandb_logger = WandbLogger(
-        project="housing-prediction-pytorch",
-        name="pytorch-lightning-real",
+        project="housing-prediction-alex",
+        name="pytorch-lightning-iteration1",
         log_model=True
     )
 

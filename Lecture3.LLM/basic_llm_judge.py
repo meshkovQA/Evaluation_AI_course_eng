@@ -16,7 +16,7 @@ Return only a number from 1 to 10 and a brief explanation.
 """
 
     response = google_chat_v3(
-        prompt, model="gemini-2.0-flash", temperature=0.1)
+        prompt, model="gemini-2.5-flash", temperature=0.1)
     return response
 
 

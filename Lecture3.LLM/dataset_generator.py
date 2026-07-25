@@ -1,5 +1,5 @@
 from typing import List, Dict
-from ai_client import openai_chat_v3
+from ai_client import openai_chat_v2
 
 
 def get_question_style_guidance(question_openness: str, question_length: str) -> str:
@@ -142,13 +142,6 @@ trap_density = 0.2
 
 
 # ==================
-# LLM Settings
-# ==================
-model = "gpt-4o"  # Specify the model to use for generation
-temperature = 0.0  # Lower temperature for more deterministic output
-
-
-# ==================
 # Dataset Generation
 # ==================
 
@@ -165,11 +158,7 @@ def generate_from_scratch():
         language=language
     )
 
-    raw = openai_chat_v3(
-        prompt=prompt,
-        model=model,
-        temperature=temperature,
-    )
+    raw = openai_chat_v2(prompt)
 
     return raw
 

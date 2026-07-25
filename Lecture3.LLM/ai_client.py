@@ -3,14 +3,16 @@ from openai import OpenAI
 from google import genai
 from google.genai import types
 
-client = OpenAI(api_key="")
+from config import open_ai_api_key, google_api_key
 
-client_google = genai.Client(api_key="")
+client = OpenAI(api_key=open_ai_api_key)
+
+client_google = genai.Client(api_key=google_api_key)
 
 
 def google_chat(prompt: str) -> str:
     response = client_google.models.generate_content(
-        model="gemini-2.0-flash-lite",
+        model="gemini-2.5-flash-lite",
         contents=prompt,
     )
 
@@ -21,7 +23,7 @@ def google_chat(prompt: str) -> str:
 
 def google_chat_v2(prompt: str) -> str:
     response = client_google.models.generate_content(
-        model="gemini-2.0-flash-lite",
+        model="gemini-2.5-flash-lite",
         contents=prompt,
         config=types.GenerateContentConfig(
             temperature=0.1
@@ -49,7 +51,7 @@ def google_chat_v3(prompt: str, model: str, temperature: float) -> str:
 
 def openai_chat(prompt: str) -> str:
     response = client.responses.create(
-        model="gpt-3.5-turbo",
+        model="gpt-5.4-mini-2026-03-17",
         input=prompt,
     )
 
@@ -60,24 +62,12 @@ def openai_chat(prompt: str) -> str:
 
 def openai_chat_v2(prompt: str) -> str:
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="gpt-5.4-mini-2026-03-17",
         messages=[{"role": "user", "content": prompt}],
-        temperature=0.1
     )
 
     answer = response.choices[0].message.content
     print(answer)
-    return answer
-
-
-def openai_chat_v3(prompt: str, model: str, temperature: 0.1) -> str:
-    response = client.chat.completions.create(
-        model=model,
-        messages=[{"role": "user", "content": prompt}],
-        temperature=temperature
-    )
-
-    answer = response.choices[0].message.content
     return answer
 
 # Examples of how to use the functions
