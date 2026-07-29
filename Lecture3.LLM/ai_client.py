@@ -12,7 +12,7 @@ client_google = genai.Client(api_key=google_api_key)
 
 def google_chat(prompt: str) -> str:
     response = client_google.models.generate_content(
-        model="gemini-2.5-flash-lite",
+        model="gemini-2.5-flash",
         contents=prompt,
     )
 
@@ -23,7 +23,7 @@ def google_chat(prompt: str) -> str:
 
 def google_chat_v2(prompt: str) -> str:
     response = client_google.models.generate_content(
-        model="gemini-2.5-flash-lite",
+        model="gemini-2.5-flash",
         contents=prompt,
         config=types.GenerateContentConfig(
             temperature=0.1
@@ -60,9 +60,9 @@ def openai_chat(prompt: str) -> str:
     return answer
 
 
-def openai_chat_v2(prompt: str) -> str:
+def openai_chat_v2(prompt: str, model: str = "gpt-5.4-mini-2026-03-17") -> str:
     response = client.chat.completions.create(
-        model="gpt-5.4-mini-2026-03-17",
+        model=model,
         messages=[{"role": "user", "content": prompt}],
     )
 
@@ -88,4 +88,4 @@ def openai_chat_v2(prompt: str) -> str:
 
 # # Creative writing
 # story = openai_chat("Write a short story about a robot")
-# Result: an original short story
+# # Result: an original short story

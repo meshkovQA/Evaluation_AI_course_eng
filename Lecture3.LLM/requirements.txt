@@ -1,5 +1,6 @@
 openai
 google
+google-genai
 datasets
 tensorflow-macos
 sentence_transformers
@@ -11,3 +12,5 @@ language_tool_python
 textdescriptives
 transformers
 torch
+textstat
+bert_score

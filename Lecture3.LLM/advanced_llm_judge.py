@@ -1,4 +1,39 @@
+import re
+from statistics import mean, pstdev
+
 from ai_client import openai_chat_v2
+
+
+def self_consistency_judge(question, answer, n_runs=5):
+    """
+    Runs the same simple evaluation N times and averages the score
+    to reduce variance and per-call bias (self-consistency).
+    """
+    prompt = f"""
+Score the quality of the answer to the question from 1 to 10.
+
+Question: {question}
+Answer: {answer}
+
+Criteria: accuracy, completeness, readability.
+Return ONLY a single integer from 1 to 10 on the first line.
+"""
+
+    scores = []
+    for _ in range(n_runs):
+        raw = openai_chat_v2(prompt)
+        match = re.search(r"\b([1-9]|10)\b", raw)
+        if match:
+            scores.append(int(match.group(1)))
+
+    if not scores:
+        return {"score": 0, "runs": [], "std": 0.0}
+
+    return {
+        "score": round(mean(scores), 2),
+        "runs": scores,
+        "std": round(pstdev(scores), 2) if len(scores) > 1 else 0.0,
+    }
 
 
 def advanced_llm_judge(question, answer):
@@ -62,3 +97,7 @@ result = advanced_llm_judge(question, answer)
 print(f"Advanced score: {result['score']}/10")
 print(f"Number of claims: {len(result['claims'])}")
 print(f"Distribution: {result['verdict_distribution']}")
+
+sc_result = self_consistency_judge(question, answer, n_runs=5)
+print(f"\nSelf-consistency score: {sc_result['score']}/10")
+print(f"Runs: {sc_result['runs']} (std={sc_result['std']})")
