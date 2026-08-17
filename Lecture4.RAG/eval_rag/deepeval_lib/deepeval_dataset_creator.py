@@ -2,20 +2,21 @@
 Dataset creation in DeepEval from Excel and RAG answers.
 Uses the existing DatasetParser and RAGConnector.
 """
+
 import sys
 from pathlib import Path
 import time
+
 
 # Add path first
 current_dir = Path(__file__).resolve().parent  # .../deepeval_lib
 eval_rag_dir = current_dir.parent  # .../eval_rag
 sys.path.insert(0, str(eval_rag_dir))
 
-from deepeval.dataset import Golden  # noqa: E402
-import time  # noqa: E402
+from deepeval.dataset import EvaluationDataset, Golden  # noqa: E402
 from rag_connector import RAGConnector  # noqa: E402
 from dataset_parser import DatasetParser  # noqa: E402
-from deepeval.dataset import Golden, EvaluationDataset  # noqa: E402
+from config import endpoint_url, api_key  # noqa: E402
 
 
 def create_deepeval_dataset_from_excel(
@@ -67,12 +68,14 @@ def create_deepeval_dataset_from_excel(
         print(f"      ✅ Answer: {actual_output[:60]}...")
         print(f"      📚 Contexts: {len(retrieval_context)}")
 
+        # In deepeval 4.x, Golden supports actual_output and retrieval_context —
+        # we can store the RAG answer and its contexts directly in the dataset.
         golden = Golden(
             input=question,
             actual_output=actual_output,
             expected_output=expected_responses[i-1] if i -
             1 < len(expected_responses) else "",
-            retrieval_context=retrieval_context
+            retrieval_context=retrieval_context,
         )
 
         goldens.append(golden)
@@ -83,10 +86,9 @@ def create_deepeval_dataset_from_excel(
     print(f"\n💾 Step 4: Saving dataset to DeepEval...")
 
     try:
-        from deepeval.dataset import EvaluationDataset
-
-        evaluation_dataset = EvaluationDataset(goldens)
-
+        # deepeval 4.x: EvaluationDataset only accepts goldens= (keyword),
+        # and push() no longer has auto_convert_test_cases_to_goldens.
+        evaluation_dataset = EvaluationDataset(goldens=goldens)
         evaluation_dataset.push(alias=dataset_alias)
 
         print(f"✅ Dataset '{dataset_alias}' successfully created in DeepEval!")
@@ -107,8 +109,8 @@ if __name__ == "__main__":
 
     # 1. Initialize RAG connector
     rag_connector = RAGConnector(
-        endpoint_url="http://5.11.83.110:8002/api/v1/chat/",
-        api_key="rag-api-key",
+        endpoint_url=endpoint_url,
+        api_key=api_key,
         timeout=30
     )
 

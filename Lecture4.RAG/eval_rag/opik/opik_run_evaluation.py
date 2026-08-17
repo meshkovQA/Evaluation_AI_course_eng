@@ -4,8 +4,9 @@ Uses an existing dataset from Opik UI and runs evaluation.
 """
 
 import sys
-sys.path.insert(
-    0, '/Users/aleksandrmeskov/Desktop/AI evaluation/AI_practice/Lecture5/eval_rag')
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import time  # noqa: E402
 from typing import List  # noqa: E402
@@ -14,6 +15,7 @@ from opik.evaluation import evaluate  # noqa: E402
 from opik import Opik  # noqa: E402
 from opik_evaluator import create_metrics, simple_rag_task  # noqa: E402
 from rag_connector import RAGConnector  # noqa: E402
+from config import endpoint_url, api_key, model as default_model  # noqa: E402
 
 
 def evaluate_rag_with_opik(
@@ -22,7 +24,7 @@ def evaluate_rag_with_opik(
     metrics_list: List[str],
     experiment_name: str = "RAG_Evaluation",
     project_name: str = "default",
-    model: str = "gpt-4o-mini",
+    model: str = default_model,
     sleep_time: float = 0.1
 ):
 
@@ -96,8 +98,8 @@ def evaluate_rag_with_opik(
 if __name__ == "__main__":
 
     rag_connector = RAGConnector(
-        endpoint_url="http://5.11.83.110:8002/api/v1/chat/",
-        api_key="sk-rag-your-key",
+        endpoint_url=endpoint_url,
+        api_key=api_key,
         timeout=30
     )
 
@@ -116,5 +118,5 @@ if __name__ == "__main__":
         metrics_list=metrics_to_use,
         experiment_name=experiment_name,
         project_name=project_name,
-        model="gpt-4o-mini"
+        model=default_model
     )

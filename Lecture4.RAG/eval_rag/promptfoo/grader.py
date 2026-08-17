@@ -1,6 +1,11 @@
 # grader.py
 import sys
-from openai import OpenAI
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from openai import OpenAI  # noqa: E402
+from config import model as default_model  # noqa: E402
 
 client = OpenAI()
 
@@ -11,7 +16,7 @@ def call_api(prompt, options=None, context=None):
     """
     try:
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model=default_model,
             messages=[{"role": "user", "content": prompt}],
             temperature=0.1
         )

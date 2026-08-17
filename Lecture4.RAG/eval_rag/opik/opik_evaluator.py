@@ -1,19 +1,25 @@
 # opik_evaluator.py
 
-from typing import List, Dict
-import opik
-from opik.evaluation.metrics import (
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from typing import List, Dict  # noqa: E402
+import opik  # noqa: E402
+from opik.evaluation.metrics import (  # noqa: E402
     AnswerRelevance,
     Hallucination,
     ContextPrecision,
     ContextRecall
 )
-from opik.evaluation import evaluate
-from opik import Opik
+from opik.evaluation import evaluate  # noqa: E402
+from opik import Opik  # noqa: E402
+from config import model as default_model  # noqa: E402
 
 
 def create_metrics(
-    model: str = "gpt-4o-mini",
+    model: str = default_model,
     metrics_list: List[str] = None,
     threshold: float = 0.7
 ):

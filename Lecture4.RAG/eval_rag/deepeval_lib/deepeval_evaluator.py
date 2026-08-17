@@ -1,13 +1,19 @@
-from typing import List, Union, Optional
-from deepeval.test_case import LLMTestCase
-from deepeval.metrics import (
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from typing import List, Union, Optional  # noqa: E402
+from deepeval.test_case import LLMTestCase  # noqa: E402
+from deepeval.metrics import (  # noqa: E402
     AnswerRelevancyMetric,
     FaithfulnessMetric,
     ContextualRelevancyMetric,
     ContextualRecallMetric,
     ContextualPrecisionMetric
 )
-from deepeval import evaluate
+from deepeval import evaluate  # noqa: E402
+from config import model as default_model  # noqa: E402
 
 
 def create_metrics(
@@ -46,7 +52,7 @@ if __name__ == "__main__":
     print("📊 Example 1: Standard OpenAI model")
 
     metrics = create_metrics(
-        model="gpt-4o-mini",
+        model=default_model,
         metrics_list=['answer_relevancy', 'faithfulness'],
         threshold=0.7
     )
@@ -63,10 +69,11 @@ if __name__ == "__main__":
 
     # ============= EXAMPLE 2: Direct DeepEval usage =============
     print("\n" + "="*60)
-    print("📊 Example 3: Direct DeepEval usage (no wrapper)")
+    print("📊 Example 2: Direct DeepEval usage (no wrapper)")
 
     metric = AnswerRelevancyMetric(
-        model="gpt-4o-mini",
+        model=default_model,
+        threshold=0.7,
         include_reason=True,
         async_mode=False
     )

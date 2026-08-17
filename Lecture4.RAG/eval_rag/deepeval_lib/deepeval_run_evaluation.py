@@ -4,8 +4,9 @@ Loads the dataset from Excel, queries the RAG system, and runs evaluation.
 """
 
 import sys
-sys.path.insert(
-    0, '/Users/aleksandrmeskov/Desktop/AI evaluation/AI_practice/Lecture5/eval_rag')
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import time  # noqa: E402
 import pandas as pd  # noqa: E402
@@ -15,13 +16,14 @@ from deepeval import evaluate  # noqa: E402
 from dataset_parser import DatasetParser  # noqa: E402
 from rag_connector import RAGConnector  # noqa: E402
 from deepeval_evaluator import create_metrics  # noqa: E402
+from config import endpoint_url, api_key, model as default_model  # noqa: E402
 
 
 def evaluate_rag_from_excel(
     excel_path: str,
     rag_connector: RAGConnector,
     metrics_list: List[str],
-    model: Union[str] = "gpt-4o-mini",
+    model: Union[str] = default_model,
     threshold: float = 0.7,
     sleep_time: float = 0.1
 ):
@@ -121,8 +123,8 @@ if __name__ == "__main__":
 
     # 1. Initialize RAG connector
     rag_connector = RAGConnector(
-        endpoint_url="http://5.11.83.110:8002/api/v1/chat/",
-        api_key="rag-api-key",
+        endpoint_url=endpoint_url,
+        api_key=api_key,
         timeout=30
     )
 
@@ -142,7 +144,7 @@ if __name__ == "__main__":
         excel_path=excel_path,
         rag_connector=rag_connector,
         metrics_list=metrics_to_use,
-        model="gpt-4o-mini",
+        model=default_model,
         threshold=0.7,
         sleep_time=0.1
     )

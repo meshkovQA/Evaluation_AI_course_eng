@@ -1,6 +1,11 @@
 # test_batch_evaluation.py
-import asyncio
-from eval_lib import (
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+import asyncio  # noqa: E402
+from eval_lib import (  # noqa: E402
     evaluate,
     EvalTestCase,
     AnswerRelevancyMetric,
@@ -8,6 +13,7 @@ from eval_lib import (
     ContextualRelevancyMetric
 
 )
+from config import model as default_model  # noqa: E402
 
 
 # ==================== TEST 1: Batch Standard Metrics with OpenAI ====================
@@ -35,17 +41,17 @@ async def test_batch_standard_metrics():
     # Define metrics
     metrics = [
         AnswerRelevancyMetric(
-            model="gpt-4o-mini",
+            model=default_model,
             threshold=0.7,
             temperature=1.0,
         ),
         FaithfulnessMetric(
-            model="gpt-4o-mini",
+            model=default_model,
             threshold=0.8,
             temperature=1.0,
         ),
         ContextualRelevancyMetric(
-            model="gpt-4o-mini",
+            model=default_model,
             threshold=1.0,
         ),
     ]
@@ -83,17 +89,17 @@ async def test_standard_metrics_with_custom_model():
     # Define metrics
     metrics = [
         AnswerRelevancyMetric(
-            model="gpt-4o-mini",
+            model=default_model,
             threshold=0.7,
             temperature=0.1,
         ),
         FaithfulnessMetric(
-            model="gpt-4o-mini",
+            model=default_model,
             threshold=0.8,
             temperature=1.0,
         ),
         ContextualRelevancyMetric(
-            model="gpt-4o-mini",
+            model=default_model,
             threshold=1.0,
         ),
     ]

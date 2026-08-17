@@ -1,6 +1,12 @@
 # test_dataset_generation.py
-import asyncio
-from eval_lib import DatasetGenerator
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+import asyncio  # noqa: E402
+from eval_lib import DatasetGenerator  # noqa: E402
+from config import model as default_model  # noqa: E402
 
 
 # ==================== TEST 1: Generate from Scratch ====================
@@ -10,7 +16,7 @@ async def test_generate_from_scratch_basic():
     """Basic dataset generation without documents"""
 
     generator = DatasetGenerator(
-        model="gpt-4o-mini",
+        model=default_model,
         agent_description="A customer support chatbot for an e-commerce platform",
         input_format="User question or request about orders, shipping, returns",
         expected_output_format="Helpful and professional response",
@@ -35,7 +41,7 @@ async def test_generate_from_multiple_documents():
     """Generate dataset from multiple documents"""
 
     generator = DatasetGenerator(
-        model="gpt-4o-mini",
+        model=default_model,
         embedding_model="gpt-4o-mini",
         agent_description="Technical documentation assistant",
         input_format="Technical question about product features",

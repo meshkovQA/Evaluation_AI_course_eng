@@ -20,13 +20,14 @@ from eval_lib import (  # noqa: E402
 )
 from dataset_parser import DatasetParser  # noqa: E402
 from rag_connector import RAGConnector  # noqa: E402
+from config import endpoint_url, api_key, model as default_model  # noqa: E402
 
 
 async def evaluate_rag_from_excel(
     excel_path: str,
     rag_connector: RAGConnector,
     metrics_list: List[str],
-    model: str = "gpt-4o-mini",
+    model: str = default_model,
     threshold: float = 0.7,
     temperature: float = 0.5,
     sleep_time: float = 0.1,
@@ -159,8 +160,8 @@ async def scenario_1_standard_openai():
     print("="*70)
 
     rag_connector = RAGConnector(
-        endpoint_url="http://5.11.83.110:8002/api/v1/chat/",
-        api_key="rag-api-key",
+        endpoint_url=endpoint_url,
+        api_key=api_key,
         timeout=30
     )
 
@@ -176,7 +177,7 @@ async def scenario_1_standard_openai():
         excel_path=excel_path,
         rag_connector=rag_connector,
         metrics_list=metrics_to_use,
-        model="gpt-4o-mini",  # Standard OpenAI
+        model=default_model,  # Standard OpenAI
         threshold=0.7,
         temperature=0.5,
         sleep_time=0.1,
@@ -193,8 +194,8 @@ async def scenario_2_custom_model():
     """Scenario 2: Same direct OpenAI model with different prompt phrasing"""
 
     rag_connector = RAGConnector(
-        endpoint_url="http://5.11.83.110:8002/api/v1/chat/",
-        api_key="rag-api-key",
+        endpoint_url=endpoint_url,
+        api_key=api_key,
         timeout=30
     )
 
@@ -210,7 +211,7 @@ async def scenario_2_custom_model():
         excel_path=excel_path,
         rag_connector=rag_connector,
         metrics_list=metrics_to_use,
-        model="gpt-4o-mini",
+        model=default_model,
         threshold=0.7,
         temperature=0.5,
         sleep_time=0.1,
@@ -226,8 +227,8 @@ async def scenario_3_strict_evaluation():
     """Scenario 3: Strict evaluation (low temperature)"""
 
     rag_connector = RAGConnector(
-        endpoint_url="http://5.11.83.110:8002/api/v1/chat/",
-        api_key="rag-api-key",
+        endpoint_url=endpoint_url,
+        api_key=api_key,
         timeout=30
     )
 
@@ -242,7 +243,7 @@ async def scenario_3_strict_evaluation():
         excel_path=excel_path,
         rag_connector=rag_connector,
         metrics_list=metrics_to_use,
-        model="gpt-4o-mini",
+        model=default_model,
         threshold=0.8,  # High threshold
         temperature=0.1,  # STRICT: all verdicts matter
         sleep_time=0.1,
@@ -258,8 +259,8 @@ async def scenario_4_lenient_evaluation():
     """Scenario 4: Lenient evaluation (high temperature)"""
 
     rag_connector = RAGConnector(
-        endpoint_url="http://5.11.83.110:8002/api/v1/chat/",
-        api_key="rag-api-key",
+        endpoint_url=endpoint_url,
+        api_key=api_key,
         timeout=30
     )
 
@@ -274,7 +275,7 @@ async def scenario_4_lenient_evaluation():
         excel_path=excel_path,
         rag_connector=rag_connector,
         metrics_list=metrics_to_use,
-        model="gpt-4o-mini",
+        model=default_model,
         threshold=0.6,  # Low threshold
         temperature=1.0,  # LENIENT: focus on positive verdicts
         sleep_time=0.1,
