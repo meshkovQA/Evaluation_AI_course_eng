@@ -26,11 +26,11 @@ docker-compose up --build
 
 ### 3. Check it works
 ```bash
-curl "http://localhost:8002/health"
+curl "http://localhost:8022/health"
 ```
 
 ### 4. Open documentation
-http://localhost:8002/docs
+http://localhost:8022/docs
 
 ## 📁 Supported Formats
 
@@ -78,14 +78,14 @@ MAX_FILE_SIZE=52428800  # 50MB
 
 ### Upload a document
 ```bash
-curl -X POST "http://localhost:8002/api/v1/documents/upload" \
+curl -X POST "http://localhost:8022/api/v1/documents/upload" \
   -F "file=@document.pdf" \
   -F "title=My Document"
 ```
 
 ### Ask a question
 ```bash
-curl -X POST "http://localhost:8002/api/v1/chat/" \
+curl -X POST "http://localhost:8022/api/v1/chat/" \
   -H "Content-Type: application/json" \
   -d '{
     "message": "What is this document about?",
@@ -100,7 +100,7 @@ curl "http://localhost:8000/api/v1/documents/"
 
 ### Search documents
 ```bash
-curl "http://localhost:8002/api/v1/documents/search/?query=important+information"
+curl "http://localhost:8022/api/v1/documents/search/?query=important+information"
 ```
 
 ## 🐍 Python Client
@@ -109,7 +109,7 @@ curl "http://localhost:8002/api/v1/documents/search/?query=important+information
 import requests
 
 class RAGClient:
-    def __init__(self, base_url="http://localhost:8002"):
+    def __init__(self, base_url="http://localhost:8022"):
         self.api_url = f"{base_url}/api/v1"
     
     def upload_document(self, file_path, title=None):
@@ -190,7 +190,7 @@ uvicorn app.main:app --reload
 
 ### Health check
 ```bash
-curl "http://localhost:8002/health"
+curl "http://localhost:8022/health"
 ```
 
 ### Docker logs
@@ -302,8 +302,8 @@ docker-compose up --build
 
 ## 📞 Support
 
-- **Documentation**: http://localhost:8002/docs
-- **Health check**: http://localhost:8002/health
+- **Documentation**: http://localhost:8022/docs
+- **Health check**: http://localhost:8022/health
 - **Testing**: `python test_rag_system.py`
 
 ## 📄 License

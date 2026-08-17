@@ -30,9 +30,9 @@ RUN mkdir -p storage/documents storage/vector_db/chroma && \
 # Switch to application user
 USER app
 
-EXPOSE 8021
+EXPOSE 8022
 
 ENV PYTHONPATH=/home/app
 ENV PYTHONUNBUFFERED=1
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8021"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8022"]

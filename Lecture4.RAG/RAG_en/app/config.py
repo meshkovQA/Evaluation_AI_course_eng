@@ -13,7 +13,7 @@ class Settings(BaseSettings):
 
     # API settings
     API_HOST: str = "0.0.0.0"
-    API_PORT: int = 8002
+    API_PORT: int = 8022
     API_PREFIX: str = "/api/v1"
 
     # Document storage
@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: Optional[str] = None
     ANTHROPIC_API_KEY: Optional[str] = None
     DEFAULT_LLM_PROVIDER: str = "openai"  # openai, anthropic, local
-    DEFAULT_LLM_MODEL: str = "gpt-4o-mini"
+    DEFAULT_LLM_MODEL: str = "gpt-5.4-mini-2026-03-17"
 
     # Embedding settings
     EMBEDDING_PROVIDER: str = "openai"  # openai, huggingface, local
