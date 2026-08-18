@@ -8,3 +8,4 @@ __pycache__/
 .env.*
 !.env.example
 .venv
+Lecture4.RAG/RAG_docs
