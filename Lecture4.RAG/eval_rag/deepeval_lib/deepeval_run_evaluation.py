@@ -129,7 +129,7 @@ if __name__ == "__main__":
     )
 
     # 2. Path to Excel file
-    excel_path = "data/evaluation_dataset.xlsx"
+    excel_path = "Lecture4.RAG/eval_rag/data/evaluation_dataset_happy_path.xlsx"
 
     # 3. Select evaluation metrics
     metrics_to_use = [

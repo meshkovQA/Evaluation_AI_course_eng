@@ -128,7 +128,8 @@ class DatasetParser:
 if __name__ == "__main__":
     parser = DatasetParser()
 
-    file_path = "data/evaluation_dataset.xlsx"  # replace with your path
+    # replace with your path
+    file_path = "Lecture4.RAG/eval_rag/data/evaluation_dataset_happy_path.xlsx"
     df = parser.load_dataset(file_path)
 
     if df is not None:
