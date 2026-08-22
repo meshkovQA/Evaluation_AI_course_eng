@@ -4,6 +4,7 @@ Uses an existing dataset from Opik UI and runs evaluation.
 """
 
 import sys
+
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -22,8 +23,8 @@ def evaluate_rag_with_opik(
     dataset_name: str,
     rag_connector: RAGConnector,
     metrics_list: List[str],
-    experiment_name: str = "RAG_Evaluation",
-    project_name: str = "default",
+    experiment_name: str = "v_1_RAG_Evaluation",
+    project_name: str = "Test evaluation",
     model: str = default_model,
     sleep_time: float = 0.1
 ):
@@ -103,8 +104,8 @@ if __name__ == "__main__":
         timeout=30
     )
 
-    dataset_name = "simple_test_dataset_v3"
-    experiment_name = "RAG_Evaluation_From_Dataset_v6"
+    dataset_name = "simple_test_dataset_v4"
+    experiment_name = "RAG_Evaluation_From_Dataset_v7"
     project_name = "Test evaluation"
 
     metrics_to_use = [

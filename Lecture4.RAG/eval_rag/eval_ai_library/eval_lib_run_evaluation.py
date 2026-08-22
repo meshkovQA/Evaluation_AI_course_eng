@@ -3,6 +3,7 @@ End-to-End RAG Evaluation Pipeline with eval_lib.
 Loads the dataset from Excel, queries the RAG system, and runs evaluation.
 """
 import sys
+import asyncio
 import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -152,7 +153,7 @@ async def evaluate_rag_from_excel(
 
 # ==================== TEST SCENARIOS ====================
 
-async def scenario_1_standard_openai():
+async def scenario_standard_openai():
     """Scenario 1: Standard OpenAI model"""
 
     print("\n" + "="*70)
@@ -165,7 +166,7 @@ async def scenario_1_standard_openai():
         timeout=30
     )
 
-    excel_path = "data/evaluation_dataset.xlsx"
+    excel_path = "Lecture4.RAG/eval_rag/data/evaluation_dataset_happy_path.xlsx"
 
     metrics_to_use = [
         'answer_relevancy',
@@ -190,103 +191,6 @@ async def scenario_1_standard_openai():
     return results
 
 
-async def scenario_2_custom_model():
-    """Scenario 2: Same direct OpenAI model with different prompt phrasing"""
-
-    rag_connector = RAGConnector(
-        endpoint_url=endpoint_url,
-        api_key=api_key,
-        timeout=30
-    )
-
-    excel_path = "data/evaluation_dataset.xlsx"
-
-    metrics_to_use = [
-        'answer_relevancy',
-        'faithfulness',
-        'contextual_relevancy'
-    ]
-
-    results = await evaluate_rag_from_excel(
-        excel_path=excel_path,
-        rag_connector=rag_connector,
-        metrics_list=metrics_to_use,
-        model=default_model,
-        threshold=0.7,
-        temperature=0.5,
-        sleep_time=0.1,
-        verbose=True,
-        show_dashboard=True,
-        session_name="OpenAI Model Evaluation"
-    )
-
-    return results
-
-
-async def scenario_3_strict_evaluation():
-    """Scenario 3: Strict evaluation (low temperature)"""
-
-    rag_connector = RAGConnector(
-        endpoint_url=endpoint_url,
-        api_key=api_key,
-        timeout=30
-    )
-
-    excel_path = "data/evaluation_dataset.xlsx"
-
-    metrics_to_use = [
-        'answer_relevancy',
-        'faithfulness'
-    ]
-
-    results = await evaluate_rag_from_excel(
-        excel_path=excel_path,
-        rag_connector=rag_connector,
-        metrics_list=metrics_to_use,
-        model=default_model,
-        threshold=0.8,  # High threshold
-        temperature=0.1,  # STRICT: all verdicts matter
-        sleep_time=0.1,
-        verbose=True,
-        show_dashboard=True,
-        session_name="Strict Evaluation"
-    )
-
-    return results
-
-
-async def scenario_4_lenient_evaluation():
-    """Scenario 4: Lenient evaluation (high temperature)"""
-
-    rag_connector = RAGConnector(
-        endpoint_url=endpoint_url,
-        api_key=api_key,
-        timeout=30
-    )
-
-    excel_path = "data/evaluation_dataset.xlsx"
-
-    metrics_to_use = [
-        'answer_relevancy',
-        'faithfulness'
-    ]
-
-    results = await evaluate_rag_from_excel(
-        excel_path=excel_path,
-        rag_connector=rag_connector,
-        metrics_list=metrics_to_use,
-        model=default_model,
-        threshold=0.6,  # Low threshold
-        temperature=1.0,  # LENIENT: focus on positive verdicts
-        sleep_time=0.1,
-        verbose=True,
-        show_dashboard=True,
-        session_name="Lenient Evaluation"
-    )
-
-    return results
-
-
 if __name__ == "__main__":
 
-    asyncio.run(scenario_3_strict_evaluation())
+    asyncio.run(scenario_standard_openai())
