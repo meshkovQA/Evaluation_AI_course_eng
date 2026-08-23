@@ -1,3 +1,3 @@
-question
-"Tell me about the methods in product_service?"
-"How does authorization work?"
+query,
+"I'm writing test cases for the order management part of the app and I keep mixing up what happens with an order's status in different scenarios. Can you explain what the possible order statuses are, and specifically what's different between an order that gets completed versus one that gets canceled by the user, especially in terms of what happens to the stock?",
+"I just got assigned the superadmin role and I'm not familiar with the new product approval workflow yet. Can you explain how I would go about approving or rejecting a pending product request, who else besides me can see this screen, and what actually happens in the system depending on which action I take?",
