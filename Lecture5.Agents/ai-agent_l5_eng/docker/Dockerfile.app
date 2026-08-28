@@ -19,4 +19,4 @@ RUN pip install --no-cache-dir \
 
 COPY app /app/app
 
-EXPOSE 8004
+EXPOSE 8010
