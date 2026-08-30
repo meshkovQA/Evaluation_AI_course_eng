@@ -160,14 +160,14 @@ if __name__ == "__main__":
 
     # Agent
     agent = AgentConnector(
-        endpoint_url="http://5.11.83.110:8004/ask",
-        api_key="api-key-for-agent",
+        endpoint_url="http://5.11.83.110:8010/ask",
+        api_key="80456142-5441-4469-b97f-1d72b7802a93",
         user_id="AleksM",
         session_id="3bb76ef7-3c21-4644-9890-eb5d6a223017"
     )
 
     # Dataset
-    excel_path = "data/evaluation_dataset.xlsx"
+    excel_path = "Lecture5.Agents/data/evaluation_dataset.xlsx"
 
     # URLs to pass to agent
     test_urls = [
