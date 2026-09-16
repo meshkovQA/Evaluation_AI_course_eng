@@ -7,13 +7,6 @@ Metrics based on an MLLM judge (GPT-4o / gpt-4o-mini by default):
 - ImageReference:   whether the text properly references the images
 - TextToImage:      quality of an image generated from a prompt
 
-Since DeepEval 4.x the multimodal API changed:
-- `MLLMTestCase` was removed; use the regular `LLMTestCase` instead.
-- `input` is a plain string, `actual_output` is a single string in which images
-  are embedded as `MLLMImage` placeholders (metrics parse them back out and
-  analyse the text surrounding each image).
-- `MLLMImage` auto-detects local vs. remote and loads the image on creation.
-
 All metrics return a score in the range 0-1 (higher is better).
 """
 
@@ -47,9 +40,6 @@ def _to_mllm_image(source: Union[str, Path, MLLMImage]) -> MLLMImage:
     """
     Build an MLLMImage from a path/URL/MLLMImage.
 
-    In DeepEval 4.x `local` is auto-detected, but we pass it explicitly for
-    clarity. Local paths are resolved to absolute so evaluation works regardless
-    of the current working directory.
     """
     if isinstance(source, MLLMImage):
         return source
@@ -194,7 +184,8 @@ if __name__ == "__main__":
     print("-" * 40)
 
     prompt = "a man with glasses working on a laptop with code on monitors in an office"
-    result = evaluate_text_to_image(prompt=prompt, generated_image_path=original)
+    result = evaluate_text_to_image(
+        prompt=prompt, generated_image_path=original)
     _print_result(result)
 
     # ---------------------------------------------------
