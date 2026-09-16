@@ -1,159 +1,175 @@
 """
-DeepEval multimodal metrics for image evaluation
+DeepEval multimodal metrics for image evaluation (DeepEval 4.x API).
 
-Metrics based on GPT-4o (or other MLLM):
-- ImageCoherence: coherence of images with text
-- ImageHelpfulness: helpfulness of images for understanding
-- TextToImageMetric: quality of image generation from prompt
-- MultimodalAnswerRelevancy: relevance of RAG answer with images
+Metrics based on an MLLM judge (GPT-4o / gpt-4o-mini by default):
+- ImageCoherence:   how well images fit the surrounding text
+- ImageHelpfulness: how much images help the user understand the text
+- ImageReference:   whether the text properly references the images
+- TextToImage:      quality of an image generated from a prompt
 
-All metrics return a score 0-1 (higher is better)
+Since DeepEval 4.x the multimodal API changed:
+- `MLLMTestCase` was removed; use the regular `LLMTestCase` instead.
+- `input` is a plain string, `actual_output` is a single string in which images
+  are embedded as `MLLMImage` placeholders (metrics parse them back out and
+  analyse the text surrounding each image).
+- `MLLMImage` auto-detects local vs. remote and loads the image on creation.
+
+All metrics return a score in the range 0-1 (higher is better).
 """
 
 from pathlib import Path
-from typing import Union, List
+from typing import List, Union
 
-# DeepEval imports
-from deepeval.test_case import MLLMTestCase, MLLMImage
+# DeepEval imports (4.x)
+from deepeval.test_case import LLMTestCase, MLLMImage
 from deepeval.metrics import (
     ImageCoherenceMetric,
     ImageHelpfulnessMetric,
+    ImageReferenceMetric,
     TextToImageMetric,
-    MultimodalAnswerRelevancyMetric
 )
-from deepeval import evaluate
 
 
-def _create_mllm_image(path: Union[str, Path]) -> MLLMImage:
+def _is_image_source(item) -> bool:
+    """True if `item` points to an image (existing local file or http(s) URL)."""
+    if isinstance(item, MLLMImage):
+        return True
+    source = str(item)
+    if source.startswith(("http://", "https://")):
+        return True
+    try:
+        return Path(source).is_file()
+    except OSError:
+        return False
+
+
+def _to_mllm_image(source: Union[str, Path, MLLMImage]) -> MLLMImage:
     """
-    Creates MLLMImage object from file path.
+    Build an MLLMImage from a path/URL/MLLMImage.
 
-    Args:
-        path: Path to image (local or URL)
-
-    Returns:
-        MLLMImage object for DeepEval
+    In DeepEval 4.x `local` is auto-detected, but we pass it explicitly for
+    clarity. Local paths are resolved to absolute so evaluation works regardless
+    of the current working directory.
     """
-    path_str = str(path)
+    if isinstance(source, MLLMImage):
+        return source
 
-    if path_str.startswith(("http://", "https://")):
-        return MLLMImage(url=path_str, local=False)
-    else:
-        abs_path = str(Path(path).resolve())
-        return MLLMImage(url=abs_path, local=True)
+    source_str = str(source)
+    if source_str.startswith(("http://", "https://")):
+        return MLLMImage(url=source_str, local=False)
+
+    abs_path = str(Path(source_str).resolve())
+    return MLLMImage(url=abs_path, local=True)
 
 
-def _build_actual_output(items: List) -> List:
+def _build_multimodal_output(items: List) -> str:
     """
-    Converts list of elements to actual_output for DeepEval.
-    File path strings are converted to MLLMImage.
+    Interleave text and images into a single `actual_output` string.
+
+    Accepts a list mixing plain text (str) and images (file paths, URLs or
+    MLLMImage objects). Each image is inserted as its DeepEval placeholder
+    (via `str(MLLMImage(...))`), so the judge can read the text above/below it.
+
+    Example:
+        ["Here is the workspace:", "img.png", "That is the setup."]
+        -> "Here is the workspace:\\n[DEEPEVAL:IMAGE:...]\\nThat is the setup."
     """
-    actual_output = []
+    parts: List[str] = []
     for item in items:
-        if isinstance(item, str):
-            if Path(item).exists():
-                actual_output.append(_create_mllm_image(item))
-            else:
-                actual_output.append(item)
-        elif isinstance(item, MLLMImage):
-            actual_output.append(item)
+        if _is_image_source(item):
+            parts.append(str(_to_mllm_image(item)))
         else:
-            actual_output.append(item)
-    return actual_output
+            parts.append(str(item))
+    return "\n".join(parts)
+
+
+def _metric_result(metric) -> dict:
+    """Extract a clean, serialisable result from a measured metric."""
+    return {
+        "metric": metric.__name__,
+        "score": metric.score,
+        "reason": metric.reason,
+        "threshold": metric.threshold,
+        "success": metric.is_successful(),
+    }
+
+
+def _measure_single_turn(metric, input_prompt: str, actual_output: List) -> dict:
+    """Shared flow for image-in-context metrics (coherence/helpfulness/reference)."""
+    test_case = LLMTestCase(
+        input=input_prompt,
+        actual_output=_build_multimodal_output(actual_output),
+    )
+    metric.measure(test_case)
+    return _metric_result(metric)
 
 
 def evaluate_image_coherence(
     input_prompt: str,
     actual_output: List,
     threshold: float = 0.5,
-    model: str = "gpt-4o-mini"
+    model: str = "gpt-4o-mini",
 ) -> dict:
-
-    test_case = MLLMTestCase(
-        input=[input_prompt],
-        actual_output=_build_actual_output(actual_output)
-    )
-
-    metric = ImageCoherenceMetric(
-        threshold=threshold,
-        model=model
-    )
-
-    res = evaluate(test_cases=[test_case], metrics=[metric])
-
-    return res
+    """Evaluate how coherently each image fits its surrounding text."""
+    metric = ImageCoherenceMetric(model=model, threshold=threshold)
+    return _measure_single_turn(metric, input_prompt, actual_output)
 
 
 def evaluate_image_helpfulness(
     input_prompt: str,
     actual_output: List,
     threshold: float = 0.5,
-    model: str = "gpt-4o-mini"
+    model: str = "gpt-4o-mini",
 ) -> dict:
+    """Evaluate how much each image helps the user understand the text."""
+    metric = ImageHelpfulnessMetric(model=model, threshold=threshold)
+    return _measure_single_turn(metric, input_prompt, actual_output)
 
-    test_case = MLLMTestCase(
-        input=[input_prompt],
-        actual_output=_build_actual_output(actual_output)
-    )
 
-    metric = ImageHelpfulnessMetric(
-        threshold=threshold,
-        model=model
-    )
-
-    res = evaluate(test_cases=[test_case], metrics=[metric])
-
-    return res
+def evaluate_image_reference(
+    input_prompt: str,
+    actual_output: List,
+    threshold: float = 0.5,
+    model: str = "gpt-4o-mini",
+) -> dict:
+    """Evaluate whether the text correctly references the accompanying images."""
+    metric = ImageReferenceMetric(model=model, threshold=threshold)
+    return _measure_single_turn(metric, input_prompt, actual_output)
 
 
 def evaluate_text_to_image(
     prompt: str,
-    generated_image_path: Union[str, Path],
+    generated_image_path: Union[str, Path, MLLMImage],
     threshold: float = 0.5,
-    model: str = "gpt-4o-mini"
+    model: str = "gpt-4o-mini",
 ) -> dict:
+    """
+    Evaluate a generated image against its prompt.
 
-    test_case = MLLMTestCase(
-        input=[prompt],
-        actual_output=[_create_mllm_image(generated_image_path)]
-    )
+    TextToImageMetric requires exactly 0 images in `input` (plain-text prompt)
+    and exactly 1 image in `actual_output`.
+    """
+    image = _to_mllm_image(generated_image_path)
+    test_case = LLMTestCase(input=prompt, actual_output=str(image))
 
-    metric = TextToImageMetric(
-        threshold=threshold,
-        model=model
-    )
-
-    res = evaluate(test_cases=[test_case], metrics=[metric])
-    return res
+    metric = TextToImageMetric(model=model, threshold=threshold)
+    metric.measure(test_case)
+    return _metric_result(metric)
 
 
-def evaluate_multimodal_relevancy(
-    question: str,
-    answer_with_images: List,
-    threshold: float = 0.5,
-    model: str = "gpt-4o-mini"
-) -> dict:
-
-    test_case = MLLMTestCase(
-        input=[question],
-        actual_output=_build_actual_output(answer_with_images),
-
-    )
-
-    metric = MultimodalAnswerRelevancyMetric(
-        threshold=threshold,
-        model=model
-    )
-
-    res = evaluate(test_cases=[test_case], metrics=[metric])
-
-    return res
+def _print_result(result: dict) -> None:
+    """Pretty-print a metric result."""
+    status = "✅ PASS" if result["success"] else "❌ FAIL"
+    print(f"   {result['metric']}: {result['score']:.2f} "
+          f"(threshold {result['threshold']}) {status}")
+    if result.get("reason"):
+        print(f"   Reason: {result['reason']}")
 
 
 # Testing when started directly
 if __name__ == "__main__":
     print("=" * 50)
-    print("Testing DeepEval multimodal metrics")
+    print("Testing DeepEval multimodal metrics (DeepEval 4.x)")
     print("=" * 50)
 
     # Use ready-made sample_images
@@ -171,69 +187,64 @@ if __name__ == "__main__":
     print(f"\n📁 Using images from {sample_dir}")
 
     # ---------------------------------------------------
-    # 1. TextToImageMetric
+    # 1. TextToImage
     # ---------------------------------------------------
     print("\n" + "-" * 40)
     print("1. TextToImageMetric")
     print("-" * 40)
 
     prompt = "a man with glasses working on a laptop with code on monitors in an office"
-
-    result = evaluate_text_to_image(
-        prompt=prompt,
-        generated_image_path=original
-    )
+    result = evaluate_text_to_image(prompt=prompt, generated_image_path=original)
+    _print_result(result)
 
     # ---------------------------------------------------
     # 2. ImageCoherence
     # ---------------------------------------------------
     print("\n" + "-" * 40)
-    print("2. ImageCoherence")
+    print("2. ImageCoherenceMetric")
     print("-" * 40)
 
-    input_prompt = "Show me a software developer at work"
-    actual_output = [
-        str(original)
-    ]
-
     result = evaluate_image_coherence(
-        input_prompt=input_prompt,
-        actual_output=actual_output
+        input_prompt="Show me a software developer at work",
+        actual_output=[
+            "Here is a software developer at work:",
+            str(original),
+        ],
     )
+    _print_result(result)
 
     # ---------------------------------------------------
     # 3. ImageHelpfulness
     # ---------------------------------------------------
     print("\n" + "-" * 40)
-    print("3. ImageHelpfulness")
+    print("3. ImageHelpfulnessMetric")
     print("-" * 40)
-
-    input_prompt = "Show me what a programmer's workspace looks like"
-    actual_output = [
-        str(edited)
-    ]
 
     result = evaluate_image_helpfulness(
-        input_prompt=input_prompt,
-        actual_output=actual_output
+        input_prompt="Show me what a programmer's workspace looks like",
+        actual_output=[
+            "A typical programmer's workspace looks like this:",
+            str(edited),
+        ],
     )
+    _print_result(result)
 
     # ---------------------------------------------------
-    # 4. MultimodalAnswerRelevancy
+    # 4. ImageReference
     # ---------------------------------------------------
     print("\n" + "-" * 40)
-    print("4. MultimodalAnswerRelevancy")
+    print("4. ImageReferenceMetric")
     print("-" * 40)
 
-    question = "What does a software developer's workspace look like?"
-    answer_with_images = [
-        "A software developer's workspace typically includes a computer or laptop, multiple monitors displaying code, and other tech accessories.",
-        str(original),
-        "Here's an edited image showing a more organized and modern workspace.",
-        str(edited)
-    ]
-
-    result = evaluate_multimodal_relevancy(
-        question=question,
-        answer_with_images=answer_with_images
+    result = evaluate_image_reference(
+        input_prompt="What does a software developer's workspace look like?",
+        actual_output=[
+            "As shown in the image below, a developer's workspace has multiple monitors:",
+            str(original),
+            "The edited version below shows a cleaner, more modern setup:",
+            str(edited),
+        ],
     )
+    _print_result(result)
+
+    print("\n✅ Testing completed!")

@@ -7,8 +7,8 @@ from .lpips_metric import compute_lpips
 from .deepeval_multimodal import (
     evaluate_image_coherence,
     evaluate_image_helpfulness,
+    evaluate_image_reference,
     evaluate_text_to_image,
-    evaluate_multimodal_relevancy
 )
 
 __all__ = [
@@ -20,6 +20,6 @@ __all__ = [
     # DeepEval metrics
     "evaluate_image_coherence",
     "evaluate_image_helpfulness",
+    "evaluate_image_reference",
     "evaluate_text_to_image",
-    "evaluate_multimodal_relevancy"
 ]
